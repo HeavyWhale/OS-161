@@ -505,6 +505,7 @@ static const char *mainmenu[] = {
 #endif /* UW */
 #endif
 	"[kh] Kernel heap stats              ",
+	"[dth] Enable debug msg for threads  ",
 	"[q] Quit and shut down              ",
 	NULL
 };
@@ -517,6 +518,18 @@ cmd_mainmenu(int n, char **a)
 	(void)a;
 
 	showmenu("OS/161 kernel menu", mainmenu);
+	return 0;
+}
+
+static
+int
+cmd_debugthreads(int n, char **a)
+{
+	(void)n;
+	(void)a;
+
+	dbflags = dbflags | DB_THREADS;
+
 	return 0;
 }
 
@@ -534,6 +547,7 @@ static struct {
 	{ "help",	cmd_mainmenu },
 	{ "?o",		cmd_opsmenu },
 	{ "?t",		cmd_testmenu },
+	{ "dth",    cmd_debugthreads },
 
 	/* operations */
 	{ "s",		cmd_shell },
