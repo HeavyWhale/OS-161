@@ -119,6 +119,8 @@ struct cv {
         char *cv_name;
         // add what you need here
         // (don't forget to mark things volatile as needed)
+        volatile struct thread *holder;
+        struct wchan *wc;
 };
 
 struct cv *cv_create(const char *name);
