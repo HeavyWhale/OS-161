@@ -7,6 +7,21 @@
         "cdefs.h": "c",
         "current.h": "c",
         "cpu.h": "c",
-        "wchan.h": "c"
+        "wchan.h": "c",
+        "proc.h": "c",
+        "addrspace.h": "c",
+        "size_t.h": "c",
+        "null.h": "c",
+        "syscall.h": "c",
+        "unistd.h": "c",
+        "opt-a2.h": "c",
+        "thread.h": "c",
+        "trapframe.h": "c",
+        "array.h": "c",
+        "pid_manager.h": "c",
+        "childinfo.h": "c",
+        "fcntl.h": "c",
+        "childlist.h": "c",
+        "wait.h": "c"
     }
 }

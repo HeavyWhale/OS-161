@@ -81,6 +81,7 @@ syscall(struct trapframe *tf)
 	int callno;
 	int32_t retval;
 	int err;
+	int32_t error_code;
 
 	KASSERT(curthread != NULL);
 	KASSERT(curthread->t_curspl == 0);
@@ -107,6 +108,23 @@ syscall(struct trapframe *tf)
 	    case SYS___time:
 		err = sys___time((userptr_t)tf->tf_a0,
 				 (userptr_t)tf->tf_a1);
+		break;
+
+		case SYS_fork:
+		retval = sys_fork(tf, &error_code);
+		if (retval == -1) {
+			err = error_code;
+		} else {
+			err = 0;
+		}
+		break;
+		case SYS_execv:
+		retval = sys_execv(&tf->tf_a0, &tf->tf_a1, &error_code);
+		if (retval == -1) {
+			err = error_code;
+		} else {
+			panic("unexpected return from sys_execv");
+		}
 		break;
 #ifdef UW
 	case SYS_write:
@@ -177,7 +195,21 @@ syscall(struct trapframe *tf)
  * Thus, you can trash it and do things another way if you prefer.
  */
 void
-enter_forked_process(struct trapframe *tf)
+enter_forked_process(void* data1, unsigned long data2)
 {
-	(void)tf;
+	(void)data2;
+
+	struct trapframe tf;
+
+	bzero(&tf, sizeof(tf));
+
+	tf = *(struct trapframe*)(data1);
+	kfree(data1);
+
+	tf.tf_v0 = 0;
+	tf.tf_a3 = 0;
+	tf.tf_epc += 4;
+
+	// go back usermode
+	mips_usermode(&tf);
 }

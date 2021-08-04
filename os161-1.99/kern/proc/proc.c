@@ -50,6 +50,7 @@
 #include <vfs.h>
 #include <synch.h>
 #include <kern/fcntl.h>  
+#include <array.h>
 
 /*
  * The process for the kernel; this holds all the kernel-only threads.
@@ -68,6 +69,18 @@ static struct semaphore *proc_count_mutex;
 /* used to signal the kernel menu thread when there are no processes */
 struct semaphore *no_proc_sem;   
 #endif  // UW
+
+pid_t PID_COUNTER = 0;
+struct spinlock PID_COUNTER_MUTEX;
+
+/*
+NULL for dead process
+*/
+struct array* top_pids;
+/*
+-1 for uinitialized exit code
+*/
+struct array* top_exit_info;
 
 
 
@@ -90,9 +103,36 @@ proc_create(const char *name)
 		return NULL;
 	}
 
+	{
+		spinlock_acquire(&PID_COUNTER_MUTEX);
+    	proc->p_pid = PID_COUNTER++;
+    	spinlock_release(&PID_COUNTER_MUTEX);
+	}
+	
+	unsigned ret_index;
+	int* init_exit_info = kmalloc(sizeof(int));
+	*init_exit_info = -1;
+	int add_fail1 = array_add(top_pids, (void*)proc, &ret_index);
+	int add_fail2 = array_add(top_exit_info, (void*)init_exit_info, &ret_index);
+	if (add_fail1) {
+    	kfree(proc);
+		return NULL;
+  	}
+  	if (add_fail2) {
+		array_remove(top_pids, proc->p_pid);
+    	kfree(proc);
+		return NULL;
+  	}
+	KASSERT(ret_index == (unsigned)proc->p_pid);
+
+	//proc->p_children = array_create();
+
 	threadarray_init(&proc->p_threads);
 	spinlock_init(&proc->p_lock);
 
+	proc->p_dead = false;
+	proc->p_mutex = lock_create("wait_lock");
+	proc->p_cv = cv_create("wait_cv");
 	/* VM fields */
 	proc->p_addrspace = NULL;
 
@@ -136,6 +176,8 @@ proc_destroy(struct proc *proc)
 		proc->p_cwd = NULL;
 	}
 
+	//kfree(proc->p_children->v);
+	array_set(top_pids, proc->p_pid, NULL);
 
 #ifndef UW  // in the UW version, space destruction occurs in sys_exit, not here
 	if (proc->p_addrspace) {
@@ -193,6 +235,11 @@ proc_destroy(struct proc *proc)
 void
 proc_bootstrap(void)
 {
+	PID_COUNTER = 0;
+    spinlock_init(&PID_COUNTER_MUTEX);
+	top_pids = array_create();
+	top_exit_info = array_create();
+
   kproc = proc_create("[kernel]");
   if (kproc == NULL) {
     panic("proc_create for kproc failed\n");

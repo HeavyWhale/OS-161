@@ -260,9 +260,6 @@ cv_create(const char *name)
                 kfree(cv);
                 return NULL;
         }
-
-        cv->holder = curthread;
-        
         return cv;
 }
 

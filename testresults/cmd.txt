@@ -1,0 +1,1 @@
+for i in {1..100}; do sys161 kernel "uw1;q" >> ../testresults/lk_impl.out; done;
