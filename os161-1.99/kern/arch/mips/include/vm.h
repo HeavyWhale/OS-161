@@ -1,3 +1,4 @@
+#include "opt-A3.h"
 /*
  * Copyright (c) 2000, 2001, 2002, 2003, 2004, 2005, 2008, 2009
  *	The President and Fellows of Harvard College.
@@ -67,6 +68,10 @@
  */
 #define PADDR_TO_KVADDR(paddr) ((paddr)+MIPS_KSEG0)
 
+#ifdef OPT_A3
+#define KVADDR_IS_VALID(vaddr) (addr >= MIPS_KSEG0)
+#define KVADDR_TO_PADDR(vaddr) ((vaddr)-MIPS_KSEG0) // as above, check validity of vaddr before call this
+#endif
 /*
  * The top of user space. (Actually, the address immediately above the
  * last valid user address.)

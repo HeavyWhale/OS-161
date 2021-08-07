@@ -1,3 +1,4 @@
+#include "opt-A3.h"
 /*
  * Copyright (c) 2000, 2001, 2002, 2003, 2004, 2005, 2008, 2009
  *	The President and Fellows of Harvard College.
@@ -39,6 +40,9 @@
 
 struct vnode;
 
+#ifdef OPT_A3
+struct PTE;
+#endif
 
 /* 
  * Address space - data structure associated with the virtual memory
@@ -48,6 +52,21 @@ struct vnode;
  */
 
 struct addrspace {
+
+#ifdef OPT_A3
+// Code segment
+  vaddr_t     as_vbase1;
+  struct PTE *as_table1; // page table for code segment
+  size_t      as_npages1;
+// Data segment
+  vaddr_t     as_vbase2;
+  struct PTE *as_table2; // page table for data segment
+  size_t      as_npages2;
+// Stack segment
+  struct PTE *as_stacktable;
+
+  bool is_elf_loaded;
+#else
   vaddr_t as_vbase1;
   paddr_t as_pbase1;
   size_t as_npages1;
@@ -55,6 +74,7 @@ struct addrspace {
   paddr_t as_pbase2;
   size_t as_npages2;
   paddr_t as_stackpbase;
+#endif //OPT_A3
 };
 
 /*

@@ -1,3 +1,4 @@
+#include "opt-A3.h"
 /*
  * Copyright (c) 2000, 2001, 2002, 2003, 2004, 2005, 2008, 2009
  *	The President and Fellows of Harvard College.
@@ -506,6 +507,9 @@ static const char *mainmenu[] = {
 #endif
 	"[kh] Kernel heap stats              ",
 	"[dth] Enable debug msg for threads  ",
+#ifdef OPT_A3
+	"[dexec] Enable debug msg for execution  ",
+#endif
 	"[q] Quit and shut down              ",
 	NULL
 };
@@ -533,6 +537,32 @@ cmd_debugthreads(int n, char **a)
 	return 0;
 }
 
+#ifdef OPT_A3
+static
+int
+cmd_debugexec(int n, char**a)
+{
+	(void)n;
+	(void)a;
+
+	dbflags = dbflags | DB_EXEC;
+
+	return 0;
+}
+
+static
+int
+cmd_debugvm(int n, char**a)
+{
+	(void)n;
+	(void)a;
+
+	dbflags = dbflags | DB_VM;
+
+	return 0;
+}
+#endif
+
 ////////////////////////////////////////
 //
 // Command table.
@@ -548,6 +578,10 @@ static struct {
 	{ "?o",		cmd_opsmenu },
 	{ "?t",		cmd_testmenu },
 	{ "dth",    cmd_debugthreads },
+#ifdef OPT_A3
+	{ "dexec",  cmd_debugexec },
+	{ "dvm",    cmd_debugvm },
+#endif
 
 	/* operations */
 	{ "s",		cmd_shell },

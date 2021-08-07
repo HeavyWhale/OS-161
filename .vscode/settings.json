@@ -7,6 +7,12 @@
         "cdefs.h": "c",
         "current.h": "c",
         "cpu.h": "c",
-        "wchan.h": "c"
+        "wchan.h": "c",
+        "vm.h": "c",
+        "elf.h": "c",
+        "mainbus.h": "c",
+        "addrspace.h": "c",
+        "*.tcc": "cpp",
+        "fstream": "cpp"
     }
 }
